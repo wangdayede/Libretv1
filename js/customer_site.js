@@ -2,7 +2,9 @@ const CUSTOMER_SITES = {
     qiqi: {
         api: 'https://www.qiqidys.com/api.php/provide/vod',
         name: '七七资源',
-    }
+   360zy: {
+       api: "https://360zy.com/api.php/provide/vod",
+       name: "TV-360资源",
 };
 
 // 调用全局方法合并
