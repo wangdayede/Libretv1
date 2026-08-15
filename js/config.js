@@ -26,6 +26,74 @@ const API_SITES = {
         api: 'https://www.hongniuzy3.com/api.php/provide/vod',
         name: '红牛影视',
         adult: true
+    },
+    uku: {
+        api: 'https://api.ukuapi.com/api.php/provide/vod/',
+        name: 'U酷'
+    },
+    hhzy: {
+        api: 'https://hhzyapi.com/api.php/provide/vod',
+        name: '豪华'
+    },
+    jszy: {
+        api: 'https://jszyapi.com/api.php/provide/vod',
+        name: '极速'
+    },
+    sijiu: {
+        api: 'https://49zyw.com/api.php/provide/vod/',
+        name: '四九'
+    },
+    suoni: {
+        api: 'https://suoniapi.com/api.php/provide/vod/',
+        name: '索尼'
+    },
+    ikun: {
+        api: 'https://ikunzyapi.com/api.php/provide/vod/',
+        name: 'ikun'
+    },
+    ffzy: {
+        api: 'http://cj.ffzyapi.com/api.php/provide/vod/',
+        name: '非凡'
+    },
+    bfzy: {
+        api: 'https://bfzyapi.com/api.php/provide/vod/',
+        name: '暴风'
+    },
+    hongniu: {
+        api: 'https://www.hongniuzy2.com/api.php/provide/vod/',
+        name: '红牛'
+    },
+    feisu: {
+        api: 'https://www.feisuzyapi.com/api.php/provide/vod/',
+        name: '飞速'
+    },
+    kuaikan: {
+        api: 'https://www.kuaikan-api.com/api.php/provide/vod/',
+        name: '快看'
+    },
+    xiongzhang: {
+        api: 'https://xzcjz.com/api.php/provide/vod/',
+        name: '熊掌'
+    },
+    shandian: {
+        api: 'http://sdzyapi.com/api.php/provide/vod/',
+        name: '闪电'
+    },
+    yinghua: {
+        api: 'https://m3u8.apiyhzy.com/api.php/provide/vod/',
+        name: '樱花'
+    },
+    wolong: {
+        api: 'https://collect.wolongzyw.com/api.php/provide/vod/',
+        name: '卧龙'
+    },
+    piaohua: {
+        api: 'http://www.ahjiuman.com/api.php/provide/vod/at/json',
+        name: '飘花'
+    },
+    kuaiche: {
+        api: 'https://caiji.kczyapi.com/api.php/provide/vod/from/kcm3u8/',
+        name: '快车M3U8'
     }
     //ARCHIVE https://telegra.ph/APIs-08-12
 };
