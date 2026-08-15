@@ -1,3 +1,4 @@
+
 // 豆瓣热门电影电视剧推荐功能
 
 // 豆瓣标签列表 - 修改为默认标签
@@ -500,10 +501,11 @@ async function fetchDoubanData(url) {
 }
 
 // 抽取渲染豆瓣卡片的逻辑到单独函数
-function renderDoubanCards(data, container) {
-    // 创建文档片段以提高性能
+// 修复：图片默认走「带鉴权的应用代理」抓取（服务端请求绕过豆瓣防盗链），
+// 失败时依次回退：直连豆瓣(no-referrer) -> 公共图片代理(images.weserv.nl)
+async function renderDoubanCards(data, container) {
     const fragment = document.createDocumentFragment();
-    
+
     // 如果没有数据
     if (!data.subjects || data.subjects.length === 0) {
         const emptyEl = document.createElement("div");
@@ -512,59 +514,105 @@ function renderDoubanCards(data, container) {
             <div class="text-pink-500">❌ 暂无数据，请尝试其他分类或刷新</div>
         `;
         fragment.appendChild(emptyEl);
-    } else {
-        // 循环创建每个影视卡片
-        data.subjects.forEach(item => {
-            const card = document.createElement("div");
-            card.className = "bg-[#111] hover:bg-[#222] transition-all duration-300 rounded-lg overflow-hidden flex flex-col transform hover:scale-105 shadow-md hover:shadow-lg";
-            
-            // 生成卡片内容，确保安全显示（防止XSS）
-            const safeTitle = item.title
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;')
-                .replace(/"/g, '&quot;');
-            
-            const safeRate = (item.rate || "暂无")
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;');
-            
-            // 处理图片URL
-            // 1. 直接使用豆瓣图片URL (添加no-referrer属性)
-            const originalCoverUrl = item.cover;
-            
-            // 2. 也准备代理URL作为备选
-            const proxiedCoverUrl = PROXY_URL + encodeURIComponent(originalCoverUrl);
-            
-            // 为不同设备优化卡片布局
-            card.innerHTML = `
-                <div class="relative w-full aspect-[2/3] overflow-hidden cursor-pointer" onclick="fillAndSearchWithDouban('${safeTitle}')">
-                    <img src="${originalCoverUrl}" alt="${safeTitle}" 
-                        class="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
-                        onerror="this.onerror=null; this.src='${proxiedCoverUrl}'; this.classList.add('object-contain');"
-                        loading="lazy" referrerpolicy="no-referrer">
-                    <div class="absolute inset-0 bg-gradient-to-t from-black to-transparent opacity-60"></div>
-                    <div class="absolute bottom-2 left-2 bg-black/70 text-white text-xs px-2 py-1 rounded-sm">
-                        <span class="text-yellow-400">★</span> ${safeRate}
-                    </div>
-                    <div class="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded-sm hover:bg-[#333] transition-colors">
-                        <a href="${item.url}" target="_blank" rel="noopener noreferrer" title="在豆瓣查看" onclick="event.stopPropagation();">
-                            🔗
-                        </a>
-                    </div>
-                </div>
-                <div class="p-2 text-center bg-[#111]">
-                    <button onclick="fillAndSearchWithDouban('${safeTitle}')" 
-                            class="text-sm font-medium text-white truncate w-full hover:text-pink-400 transition"
-                            title="${safeTitle}">
-                        ${safeTitle}
-                    </button>
-                </div>
-            `;
-            
-            fragment.appendChild(card);
-        });
+        container.innerHTML = "";
+        container.appendChild(fragment);
+        return;
     }
-    
+
+    // 预取代理鉴权参数（整个卡片列表只计算一次，避免重复异步开销）
+    let authParams = '';
+    try {
+        if (window.ProxyAuth && typeof window.ProxyAuth.getPasswordHash === 'function') {
+            const hash = await window.ProxyAuth.getPasswordHash();
+            if (hash) {
+                authParams = `?auth=${encodeURIComponent(hash)}&t=${Date.now()}`;
+            }
+        }
+    } catch (e) {
+        console.warn('获取代理鉴权参数失败，将回退直连兜底:', e);
+    }
+
+    // 循环创建每个影视卡片
+    data.subjects.forEach(item => {
+        const card = document.createElement("div");
+        card.className = "bg-[#111] hover:bg-[#222] transition-all duration-300 rounded-lg overflow-hidden flex flex-col transform hover:scale-105 shadow-md hover:shadow-lg";
+
+        // 生成卡片内容，确保安全显示（防止XSS）
+        const safeTitle = item.title
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;');
+
+        const safeRate = (item.rate || "暂无")
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;');
+
+        const originalCoverUrl = item.cover;
+        // 主图：带鉴权的应用自身代理（服务端抓取，绕过豆瓣防盗链）
+        const proxiedCoverUrl = `${PROXY_URL}${encodeURIComponent(originalCoverUrl)}${authParams}`;
+
+        const posterWrap = document.createElement("div");
+        posterWrap.className = "relative w-full aspect-[2/3] overflow-hidden cursor-pointer";
+        posterWrap.onclick = () => fillAndSearchWithDouban(safeTitle);
+
+        const img = document.createElement("img");
+        img.alt = safeTitle;
+        img.className = "w-full h-full object-cover transition-transform duration-500 hover:scale-110";
+        img.loading = "lazy";
+        img.referrerPolicy = "no-referrer";
+        img.src = proxiedCoverUrl;
+
+        // 三级兜底：代理 -> 直连豆瓣 -> 公共图片代理
+        let tried = 0;
+        img.onerror = () => {
+            tried++;
+            if (tried === 1) {
+                img.src = originalCoverUrl;
+            } else if (tried === 2) {
+                img.src = 'https://images.weserv.nl/?url=' + encodeURIComponent(originalCoverUrl);
+            } else {
+                img.onerror = null;
+                img.classList.add('object-contain');
+            }
+        };
+        posterWrap.appendChild(img);
+
+        const grad = document.createElement("div");
+        grad.className = "absolute inset-0 bg-gradient-to-t from-black to-transparent opacity-60";
+        posterWrap.appendChild(grad);
+
+        const rateBadge = document.createElement("div");
+        rateBadge.className = "absolute bottom-2 left-2 bg-black/70 text-white text-xs px-2 py-1 rounded-sm";
+        rateBadge.innerHTML = `<span class="text-yellow-400">★</span> ${safeRate}`;
+        posterWrap.appendChild(rateBadge);
+
+        const linkBadge = document.createElement("div");
+        linkBadge.className = "absolute bottom-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded-sm hover:bg-[#333] transition-colors";
+        const link = document.createElement("a");
+        link.href = item.url;
+        link.target = "_blank";
+        link.rel = "noopener noreferrer";
+        link.title = "在豆瓣查看";
+        link.textContent = "🔗";
+        link.onclick = (e) => e.stopPropagation();
+        linkBadge.appendChild(link);
+        posterWrap.appendChild(linkBadge);
+
+        card.appendChild(posterWrap);
+
+        const footer = document.createElement("div");
+        footer.className = "p-2 text-center bg-[#111]";
+        const btn = document.createElement("button");
+        btn.onclick = () => fillAndSearchWithDouban(safeTitle);
+        btn.className = "text-sm font-medium text-white truncate w-full hover:text-pink-400 transition";
+        btn.title = safeTitle;
+        btn.textContent = safeTitle;
+        footer.appendChild(btn);
+        card.appendChild(footer);
+
+        fragment.appendChild(card);
+    });
+
     // 清空并添加所有新元素
     container.innerHTML = "";
     container.appendChild(fragment);
