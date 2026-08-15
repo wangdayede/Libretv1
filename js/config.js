@@ -21,81 +21,92 @@ const SITE_CONFIG = {
 };
 
 // API站点配置
+// 数据源经连通性测试（2026-08-15）：27 个源中 19 个返回有效 maccms JSON，
+// 8 个确认失效已移除（feisu/ahiu/kuaikan/zy49/kczy 连接层失败，qiqidys 404，okzy 超时，wolong 非 JSON）。
+// 注：hhzy/maoyan/uku 在沙箱 TLS 拦截下报 SSL 错误，但关闭证书校验后可正常返回，
+// 属证书/拦截伪影，部署端代理可正常访问，故保留。
 const API_SITES = {
     testSource: {
         api: 'https://www.hongniuzy3.com/api.php/provide/vod',
         name: '红牛影视',
         adult: true
     },
-    uku: {
-        api: 'https://api.ukuapi.com/api.php/provide/vod/',
-        name: 'U酷'
+    dbzy: {
+        api: 'https://dbzy.tv/api.php/provide/vod',
+        name: '豆瓣资源'
     },
     hhzy: {
         api: 'https://hhzyapi.com/api.php/provide/vod',
-        name: '豪华'
-    },
-    jszy: {
-        api: 'https://jszyapi.com/api.php/provide/vod',
-        name: '极速'
-    },
-    sijiu: {
-        api: 'https://49zyw.com/api.php/provide/vod/',
-        name: '四九'
-    },
-    suoni: {
-        api: 'https://suoniapi.com/api.php/provide/vod/',
-        name: '索尼'
-    },
-    ikun: {
-        api: 'https://ikunzyapi.com/api.php/provide/vod/',
-        name: 'ikun'
-    },
-    ffzy: {
-        api: 'http://cj.ffzyapi.com/api.php/provide/vod/',
-        name: '非凡'
-    },
-    bfzy: {
-        api: 'https://bfzyapi.com/api.php/provide/vod/',
-        name: '暴风'
+        name: '豪华资源'
     },
     hongniu: {
-        api: 'https://www.hongniuzy2.com/api.php/provide/vod/',
-        name: '红牛'
+        api: 'https://www.hongniuzy2.com/api.php/provide/vod',
+        name: '红牛资源'
     },
-    feisu: {
-        api: 'https://www.feisuzyapi.com/api.php/provide/vod/',
-        name: '飞速'
+    jisu: {
+        api: 'https://jszyapi.com/api.php/provide/vod',
+        name: '极速资源'
     },
-    kuaikan: {
-        api: 'https://www.kuaikan-api.com/api.php/provide/vod/',
-        name: '快看'
+    jkun: {
+        api: 'https://www.jkunzyapi.com/api.php/provide/vod',
+        name: 'JKUN资源'
     },
-    xiongzhang: {
-        api: 'https://xzcjz.com/api.php/provide/vod/',
-        name: '熊掌'
+    ikun: {
+        api: 'https://ikunzyapi.com/api.php/provide/vod',
+        name: 'ikun资源'
     },
-    shandian: {
-        api: 'http://sdzyapi.com/api.php/provide/vod/',
-        name: '闪电'
+    bfzy: {
+        api: 'https://bfzyapi.com/api.php/provide/vod',
+        name: '暴风资源'
     },
     yinghua: {
-        api: 'https://m3u8.apiyhzy.com/api.php/provide/vod/',
-        name: '樱花'
+        api: 'https://m3u8.apiyhzy.com/api.php/provide/vod',
+        name: '樱花资源(m3u8)'
     },
-    wolong: {
-        api: 'https://collect.wolongzyw.com/api.php/provide/vod/',
-        name: '卧龙'
+    zy360: {
+        api: 'https://360zy.com/api.php/provide/vod',
+        name: '360资源'
     },
-    piaohua: {
-        api: 'http://www.ahjiuman.com/api.php/provide/vod/at/json',
-        name: '飘花'
+    ruyi: {
+        api: 'https://cj.rycjapi.com/api.php/provide/vod',
+        name: '如意资源'
     },
-    kuaiche: {
-        api: 'https://caiji.kczyapi.com/api.php/provide/vod/from/kcm3u8/',
-        name: '快车M3U8'
+    dyttzy: {
+        api: 'https://caiji.dyttzyapi.com/api.php/provide/vod',
+        name: '电影天堂资源'
+    },
+    ffzy: {
+        api: 'https://cj.ffzyapi.com/api.php/provide/vod',
+        name: '非凡影视'
+    },
+    suoni: {
+        api: 'https://suoniapi.com/api.php/provide/vod',
+        name: '索尼资源'
+    },
+    sdzy: {
+        api: 'http://sdzyapi.com/api.php/provide/vod',
+        name: '闪电资源'
+    },
+    uku: {
+        api: 'https://api.ukuapi.com/api.php/provide/vod',
+        name: 'U酷资源'
+    },
+    zuid: {
+        api: 'https://zuidazy.com/api.php/provide/vod',
+        name: '最大资源'
+    },
+    maoyan: {
+        api: 'https://api.maoyanapi.top/api.php/provide/vod',
+        name: '猫眼资源'
+    },
+    lzi: {
+        api: 'https://cj.lziapi.com/api.php/provide/vod',
+        name: '影视工厂'
+    },
+    tianwei: {
+        api: 'https://cj.10010888.xyz/api.php/provide/vod',
+        name: '天微采集'
     }
-    //ARCHIVE https://telegra.ph/APIs-08-12
 };
 
 // 定义合并方法
